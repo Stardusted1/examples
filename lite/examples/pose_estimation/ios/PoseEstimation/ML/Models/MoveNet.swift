@@ -41,6 +41,8 @@ final class MoveNet: PoseEstimator {
   // Model files
   private let movenetLightningFile = FileInfo(name: "movenet_lightning", ext: "tflite")
   private let movenetThunderFile = FileInfo(name: "movenet_thunder", ext: "tflite")
+  
+  private var currentModel = "null"
 
   // MARK: - Initialization
 
@@ -52,8 +54,10 @@ final class MoveNet: PoseEstimator {
     switch modelType {
     case .movenetThunder:
       fileInfo = movenetThunderFile
+      currentModel = fileInfo.name
     case .movenetLighting:
       fileInfo = movenetLightningFile
+      currentModel = fileInfo.name
     case .posenet: fatalError("Failed to use MoveNet")
     }
     guard
@@ -98,7 +102,7 @@ final class MoveNet: PoseEstimator {
   /// - Parameters:
   ///   - on: Input image to run the model.
   /// - Returns: Result of the inference and the times consumed in every steps.
-  func estimateSinglePose(on pixelBuffer: CVPixelBuffer) throws -> (Person, Times) {
+  func estimateSinglePose(on pixelBuffer: CVPixelBuffer) throws -> (Person, DebugData) {
     // Check if this MoveNet instance is already processing a video frame.
     // Return an empty detection result if it's currently busy.
     guard !isProcessing else {
@@ -150,11 +154,14 @@ final class MoveNet: PoseEstimator {
       throw PoseEstimationError.postProcessingFailed
     }
     postprocessingTime = Date().timeIntervalSince(postprocessingStartTime)
-
-    let times = Times(
+    let currentTimestamp = Date()
+    let times = DebugData(
       preprocessing: preprocessingTime,
       inference: inferenceTime,
-      postprocessing: postprocessingTime)
+      postprocessing: postprocessingTime,
+      timestamp: currentTimestamp,
+      modelName: currentModel
+    )
     return (result, times)
   }
 

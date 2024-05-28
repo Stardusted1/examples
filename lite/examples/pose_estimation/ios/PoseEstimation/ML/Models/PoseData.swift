@@ -18,11 +18,13 @@ import UIKit
 
 // MARK: Detection result
 /// Time required to run pose estimation on one frame.
-struct Times {
+struct DebugData: Codable {
   var preprocessing: TimeInterval
   var inference: TimeInterval
   var postprocessing: TimeInterval
   var total: TimeInterval { preprocessing + inference + postprocessing }
+  var timestamp: Date
+  var modelName: String
 }
 
 /// An enum describing a body part (e.g. nose, left eye etc.).

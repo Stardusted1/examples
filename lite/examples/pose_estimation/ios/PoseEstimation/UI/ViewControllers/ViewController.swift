@@ -50,6 +50,10 @@ final class ViewController: UIViewController {
 
   // Flag to make sure there's only one frame processed at each moment.
   var isRunning = false
+  
+  public static var debugDataList: [DebugData] = []
+  
+  public static var debugEnabled = false
 
   // MARK: View Handling Methods
   override func viewDidLoad() {
@@ -148,6 +152,8 @@ final class ViewController: UIViewController {
             delegate: self.delegate,
             modelType: self.modelType)
         }
+        ViewController.debugEnabled = false;
+        ViewController.debugDataList.removeAll()
       } catch let error {
         os_log("Error: %@", log: .default, type: .error, String(describing: error))
       }
@@ -168,10 +174,45 @@ final class ViewController: UIViewController {
     modelType = ModelType.allCases[sender.selectedSegmentIndex]
     updateModel()
   }
+  
+  @IBAction func onStart(_ sender: UIButton) {
+    ViewController.debugEnabled = !ViewController.debugEnabled
+    if(ViewController.debugEnabled){
+      sender.setTitle("Stop", for: .normal)
+    }else{
+      sender.setTitle("Start", for: .normal)
+    }
+  }
+  
+  @IBAction func onShareDebugData(_ sender: UIButton) {
+    guard let fileUrl = convertToJson(data: ViewController.debugDataList) else { return }
+    let activityViewController = UIActivityViewController(activityItems: [fileUrl], applicationActivities: nil)
+    // Адаптация для iPad
+    if let popoverController = activityViewController.popoverPresentationController {
+      popoverController.sourceView = sender
+      popoverController.sourceRect = sender.bounds
+    }
+    present(activityViewController, animated: true, completion: nil)
+  }
+  
+  func convertToJson(data: [DebugData]) -> URL? {
+    let encoder = JSONEncoder()
+    encoder.dateEncodingStrategy = .millisecondsSince1970
+    do {
+      let jsonData = try encoder.encode(data)
+      let filename = FileManager.default.temporaryDirectory.appendingPathComponent("DebugData.json")
+      try jsonData.write(to: filename)
+      return filename
+    } catch {
+      print("Error while creating json: \(error)")
+      return nil
+    }
+  }
 }
 
 // MARK: - CameraFeedManagerDelegate Methods
 extension ViewController: CameraFeedManagerDelegate {
+  
   func cameraFeedManager(
     _ cameraFeedManager: CameraFeedManager, didOutput pixelBuffer: CVPixelBuffer
   ) {
@@ -214,6 +255,8 @@ extension ViewController: CameraFeedManagerDelegate {
           // Visualize the pose estimation result.
           self.overlayView.draw(at: image, person: result)
         }
+        if(!ViewController.debugEnabled) {return}
+        ViewController.debugDataList.append(times)
       } catch {
         os_log("Error running pose estimation.", type: .error)
         return

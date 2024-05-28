@@ -57,7 +57,7 @@ final class CameraFeedManager: NSObject, AVCaptureVideoDataOutputSampleBufferDel
 
     guard
       let backCamera = AVCaptureDevice.default(
-        .builtInWideAngleCamera, for: .video, position: .back)
+        .builtInWideAngleCamera, for: .video, position: .front)
     else {
       return
     }
