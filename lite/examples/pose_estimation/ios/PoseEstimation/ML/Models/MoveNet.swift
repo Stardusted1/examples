@@ -159,8 +159,7 @@ final class MoveNet: PoseEstimator {
       preprocessing: preprocessingTime,
       inference: inferenceTime,
       postprocessing: postprocessingTime,
-      timestamp: currentTimestamp,
-      modelName: currentModel
+      timestamp: currentTimestamp
     )
     return (result, times)
   }

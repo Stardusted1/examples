@@ -200,7 +200,12 @@ final class ViewController: UIViewController {
     encoder.dateEncodingStrategy = .millisecondsSince1970
     do {
       let jsonData = try encoder.encode(data)
-      let filename = FileManager.default.temporaryDirectory.appendingPathComponent("DebugData.json")
+      var file = "debug_data";
+      file += "_" + modelType.rawValue
+      file += "_" + delegate.rawValue
+      file += "_" + UIDevice.current.model
+      file += ".json"
+      let filename = FileManager.default.temporaryDirectory.appendingPathComponent(file)
       try jsonData.write(to: filename)
       return filename
     } catch {

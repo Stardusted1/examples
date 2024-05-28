@@ -134,8 +134,7 @@ final class PoseNet: PoseEstimator {
       preprocessing: preprocessingTime,
       inference: inferenceTime,
       postprocessing: postprocessingTime,
-      timestamp: currentTimestamp,
-      modelName: posenetFile.name
+      timestamp: currentTimestamp
     )
     return (result, times)
   }
